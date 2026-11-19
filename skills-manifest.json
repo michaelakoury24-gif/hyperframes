@@ -6,11 +6,11 @@
       "files": 2
     },
     "hyperframes": {
-      "hash": "6792f71d4cb1e812",
+      "hash": "cf7db2721b662133",
       "files": 78
     },
     "hyperframes-cli": {
-      "hash": "d6972257fbc99fc0",
+      "hash": "8309c92957b93cab",
       "files": 13
     },
     "hyperframes-registry": {
@@ -22,7 +22,7 @@
       "files": 122
     },
     "remotion-to-hyperframes": {
-      "hash": "73b82d19db2ed8c9",
+      "hash": "b33f89d8e2a0c3bb",
       "files": 76
     },
     "reverse-any-video": {
@@ -36,6 +36,10 @@
     "style-sampling": {
       "hash": "b131690aa8a7c47f",
       "files": 2
+    },
+    "threejs": {
+      "hash": "facf1e4a22c12d07",
+      "files": 9
     }
   }
 }

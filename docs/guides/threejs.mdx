@@ -1,0 +1,104 @@
+---
+title: "Three.js"
+sidebarTitle: "Three.js"
+description: "Put a Three.js scene in a video where every frame is drawn from the seek time, so renders and repeat seeks are identical."
+---
+
+HyperFrames renders by seeking, never by playing: it asks for frame 90, waits, captures, then asks for frame 91. A Three.js demo built around `requestAnimationFrame` draws whatever its loop happened to reach, which is why a scene in a video is written as a function of one number instead.
+
+The `three` skill carries the full contract, a working starter and porting notes. This page is the short version, and the way to get it into a project.
+
+```bash
+npx hyperframes skills update threejs
+```
+
+## What the runtime gives you
+
+During a render, HyperFrames dispatches an `hf-seek` event on every seek and sets `window.__hfThreeTime`:
+
+| Signal | When | Use |
+| --- | --- | --- |
+| `hf-seek`, `event.detail.time` | every seek | draw exactly that time |
+| `event.detail.waitUntil(promise)` | inside the listener, synchronously | the capture waits for your frame |
+| `window.__hf.buildReady["<key>"]` | registered during setup | the first seek waits for it |
+| `THREE.DefaultLoadingManager` in flight | any time | render waits for the loader |
+
+## The four rules
+
+1. **Setup is one promise.** Build the scene, `await renderer.compileAsync(scene, camera)`, draw one throwaway frame, and put that promise on `window.__hf.buildReady`. The first frame a renderer draws differs from later ones, so it must not be the one captured.
+2. **Draw only in the `hf-seek` listener**, from `event.detail.time`, and register the work with `event.detail.waitUntil(promise)`. Queue each seek behind the previous one so two frames never draw concurrently.
+3. **Every visible thing is a function of `t`** in one `poseAt(t)`. No `+=` on rotation, no `clock.getDelta()`, no `Date.now()`, no unseeded `Math.random()`. During a render the clock is frozen at the seek time, so anything that accumulates stops moving.
+4. **No animation loop.** `renderer.setAnimationLoop` and `requestAnimationFrame` are the clock this format removes.
+
+A composition with no GSAP timeline — the usual case for a pure WebGL scene — needs `data-no-timeline` on its root, or the producer polls 45 seconds for a timeline that never arrives.
+
+## Minimal render.js
+
+```js
+import * as THREE from "three";
+import { createScene } from "./scene.js";
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(width, height, false);
+
+const { scene, camera, poseAt } = createScene(THREE, { aspect: width / height });
+
+const pixel = new Uint8Array(4);
+function waitForGpu() {
+  const gl = renderer.getContext();
+  renderer.setRenderTarget(null);
+  gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+}
+
+const ready = (async () => {
+  poseAt(0);
+  await renderer.compileAsync(scene, camera);
+  renderer.render(scene, camera);
+  waitForGpu();
+})();
+window.__hf = window.__hf || {};
+window.__hf.buildReady = window.__hf.buildReady || {};
+window.__hf.buildReady["scene"] = ready;
+
+let queue = ready;
+window.addEventListener("hf-seek", (event) => {
+  queue = queue.catch(() => {}).then(() => ready).then(() => {
+    poseAt(event.detail.time);
+    renderer.render(scene, camera);
+    waitForGpu();
+  });
+  event.detail.waitUntil(queue);
+});
+```
+
+`readPixels` is not decoration: `render()` returns after queueing, and on a machine without a GPU (Docker, CI) `gl.finish()` can return before the work has run, so the captured frame is the previous one.
+
+Pin three in an import map so the version cannot drift between renders:
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+  }
+</script>
+```
+
+## Check it
+
+```bash
+npx hyperframes check --json
+npx hyperframes snapshot --at 4,0,4 --no-end
+```
+
+The two stills at 4 s must be byte-identical. Then look at the frames: a black still means capture ran before setup (or `preserveDrawingBuffer` is off), a frozen scene means a clock survived the port, and two different stills at one time mean something accumulates state.
+
+## Related
+
+- [HTML in Canvas](/guides/html-in-canvas) for live DOM content as a Three.js texture
+- [Path-traced 3D](/guides/path-tracing) for the same scene exported with real bounced light
+- [Frame adapters](/concepts/frame-adapters) for how the runtime seeks Three.js
+- [Determinism](/concepts/determinism) for the general rules

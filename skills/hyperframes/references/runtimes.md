@@ -21,7 +21,7 @@ HyperFrames seeks each frame on its own, so motion must be a function of time, n
 | WAAPI                        | Native keyframes                  | `element.animate(…, { fill: "both" })` then `pause()`; times are document time, so use `delay`   |
 | Lottie / dotLottie           | After Effects exports, characters | `autoplay: false`, always set `loop`, push the instance to `window.__hfLottie`                   |
 | anime.js v4                  | Existing anime code               | `autoplay: false`, push to `window.__hfAnime`, `anime.createSeededRandom`                        |
-| Three.js, WebGPU, p5, canvas | 3D and generative                 | Draw from `e.detail.time` in an `hf-seek` listener; set `data-duration` on the root              |
+| Three.js, WebGPU, p5, canvas | 3D and generative                 | Draw from `e.detail.time` in an `hf-seek` listener; set `data-duration` on the root; `/threejs`  |
 
 Charts and map overlays: drive them from a GSAP tween's `onUpdate`, not the library's own transitions. A real place is shown on baked imagery, not drawn (`film.md` "Maps and real places"). Heavy setup (big meshes, shader compiles) registers a `window.__hf.buildReady["<key>"]` promise. Setup awaits library promises such as `renderer.compileAsync(...)`, never `requestAnimationFrame`, the clock, its own timers or `scheduler.yield()` (`path-tracing.md`).
 

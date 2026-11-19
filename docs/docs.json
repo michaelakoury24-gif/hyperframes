@@ -237,6 +237,7 @@
                   "guides/imported-film-html",
                   "concepts/frame-adapters",
                   "concepts/determinism",
+                  "guides/threejs",
                   "guides/html-in-canvas",
                   "guides/motion-blur",
                   "guides/vfx-chain",

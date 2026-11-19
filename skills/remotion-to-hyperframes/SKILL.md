@@ -42,7 +42,7 @@ Before hand-building a named visual the source used, search `npx hyperframes cat
 
 ## Hosted
 
-Keep the code and let HyperFrames own the clock: it draws the frame for the time it is given. The seek protocol and the built-in adapters for Lottie, Three.js, anime.js, WAAPI and CSS animations are in `../hyperframes/references/runtimes.md`. No `requestAnimationFrame` loop or timer as the time source, seeded randomness only, and `data-duration` on the root when nothing else defines the length.
+Keep the code and let HyperFrames own the clock: it draws the frame for the time it is given. The seek protocol and the built-in adapters for Lottie, Three.js, anime.js, WAAPI and CSS animations are in `../hyperframes/references/runtimes.md`; a Three.js port (loop, OrbitControls, mixers, loaders) is `/threejs`. No `requestAnimationFrame` loop or timer as the time source, seeded randomness only, and `data-duration` on the root when nothing else defines the length.
 
 ## Media
 

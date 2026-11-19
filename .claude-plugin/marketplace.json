@@ -9,7 +9,7 @@
     {
       "name": "hyperframes",
       "source": "./",
-      "description": "Recommended: all published HyperFrames skills in one versioned bundle. Create and render videos from HTML: the contract, film, captions, overlays, motion and look references, the CLI, the registry, media, Figma, slideshows and Remotion ports.",
+      "description": "Recommended: all published HyperFrames skills in one versioned bundle. Create and render videos from HTML: the contract, film, captions, overlays, motion and look references, the CLI, the registry, media, Three.js, Figma, slideshows and Remotion ports.",
       "homepage": "https://hyperframes.heygen.com",
       "license": "Apache-2.0"
     },
